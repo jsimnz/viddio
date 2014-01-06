@@ -104,9 +104,28 @@ func (v VideoService) cropVideo(request *restful.Request, r *restful.Response) {
 
 	// ffmpeg -ss 00:00:30 -i Dexter.S08E01.HDTV.x264-2HD.mp4 -to 00:00:10 -c copy output-2.mp4
 	cmd := exec.Command("ffmpeg", "-ss", startTime, "-i", filepath, "-to", duration, "-c", "copy", newfilepath)
-	err := cmd.Run()
+
+	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println("Could not crop file: %v", err)
+		fmt.Println("Could not get stdout pipe")
+		writeErrorResponse(r, http.StatusInternalServerError, "Could not crop file")
+		return
+	}
+
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		fmt.Println("Could not get stderr pipe")
+		writeErrorResponse(r, http.StatusInternalServerError, "Could not crop file")
+		return
+	}
+
+	go io.Copy(os.Stdout, stdoutPipe)
+	go io.Copy(os.Stdout, stderrPipe)
+	cmd.Wait()
+
+	//err := cmd.Run()
+	if err != nil {
+		fmt.Println("Could not crop file:", err)
 		writeErrorResponse(r, http.StatusInternalServerError, "Could not crop file")
 		return
 	}
