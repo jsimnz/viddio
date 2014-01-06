@@ -1,4 +1,4 @@
-metavid
+viddio
 =======
 
-A video metadata server
+A video tool server
