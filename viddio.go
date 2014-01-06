@@ -106,7 +106,7 @@ func (v VideoService) cropVideo(request *restful.Request, r *restful.Response) {
 	cmd := exec.Command("ffmpeg", "-ss", startTime, "-i", filepath, "-to", duration, "-c", "copy", newfilepath)
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Could not crop file")
+		fmt.Println("Could not crop file: %v", err)
 		writeErrorResponse(r, http.StatusInternalServerError, "Could not crop file")
 		return
 	}
